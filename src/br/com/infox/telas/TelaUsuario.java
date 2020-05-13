@@ -456,14 +456,14 @@ public class TelaUsuario extends javax.swing.JInternalFrame {
                 .addGap(650, 650, 650))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
-                    .addGap(0, 0, Short.MAX_VALUE)
+                    .addGap(0, 517, Short.MAX_VALUE)
                     .addComponent(jInternalFrame1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(0, 0, Short.MAX_VALUE)))
+                    .addGap(0, 517, Short.MAX_VALUE)))
         );
 
         getAccessibleContext().setAccessibleName("");
 
-        setBounds(0, 0, 640, 608);
+        setBounds(0, 0, 640, 585);
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtUsoFoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUsoFoneActionPerformed
