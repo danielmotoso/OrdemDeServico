@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.infox.telas;
 
 import br.com.infox.dal.ModuloConexao;
@@ -22,11 +17,12 @@ public class TelaUsuario extends javax.swing.JInternalFrame {
         conexao = ModuloConexao.conector();
     }
 
-    public void consultar() {
+    public int consultar() {
+        int retorno = 1;
         if (txtUsoID.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Por favor inserir o ID do usuário a ser consultado.");
+            JOptionPane.showMessageDialog(null, "Por favor inserir o ID do usuário.");
+            retorno = 1;
         } else {
-
             String sql = "select*from tbusuarios where iduser=?";
             try {
                 //Pegar Texto digitado no campo ID 
@@ -43,6 +39,7 @@ public class TelaUsuario extends javax.swing.JInternalFrame {
                     cbxUsoPerfil.setSelectedItem(resultadoSQL.getString(6));
                     txtUsoPrimeiraSenha.setText(resultadoSQL.getString(5));
                     txtUsoSenhaVerificada.setText(resultadoSQL.getString(5));
+                    return 0;
 
                 } else {
                     JOptionPane.showMessageDialog(null, "Usuário não cadastrado!");
@@ -52,23 +49,26 @@ public class TelaUsuario extends javax.swing.JInternalFrame {
                     cbxUsoPerfil.setSelectedItem("user");
                     txtUsoPrimeiraSenha.setText(null);
                     txtUsoSenhaVerificada.setText(null);
+                    retorno = 1;
                 }
 
             } catch (Exception e) {
                 System.out.println(e);
             }
         }
+        return retorno;
     }
 
-    public void cadastrar() {
+    public int cadastrar() {
+        int retorno = 1;
+
         String sql = "insert into tbusuarios(iduser,usuario,fone,login,senha,perfil) value (?,?,?,?,?,?)";
 
         //Verifica se campos obrigatorios estão sem preencher, e valida se as duas senhas correspondem.
-        if ((txtUsoID.getText().isEmpty() || txtUsoNome.getText().isEmpty() || txtUsologin.getText()
-                .isEmpty() || txtUsoPrimeiraSenha.getText().isEmpty()) || (txtUsoSenhaVerificada.getText()
-                == null ? txtUsoPrimeiraSenha.getText() != null : !txtUsoSenhaVerificada.getText().equals(txtUsoPrimeiraSenha.getText()))) {
+        if ((txtUsoID.getText().isEmpty() || txtUsoNome.getText().isEmpty() || txtUsologin.getText().isEmpty() || txtUsoPrimeiraSenha.getText().isEmpty()) || (txtUsoSenhaVerificada.getText() == null ? txtUsoPrimeiraSenha.getText() != null : !txtUsoSenhaVerificada.getText().equals(txtUsoPrimeiraSenha.getText()))) {
 
-            JOptionPane.showMessageDialog(null, "Algum campo não foi preenchido ou senhas digitadas não correspondem.");
+            JOptionPane.showMessageDialog(null, "Algum campo obrigatório não foi preenchido ou senhas digitadas não correspondem.");
+            retorno = 1;
 
         } else {
             try {
@@ -94,86 +94,93 @@ public class TelaUsuario extends javax.swing.JInternalFrame {
                     //cbxUsoPerfil.setSelectedItem(null);
                     txtUsoPrimeiraSenha.setText(null);
                     txtUsoSenhaVerificada.setText(null);
+                    retorno = 0;
                 } else {
                     System.out.println("Erro ao cadastrar novo usuário!");
                 }
 
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Erro ao cadastrar novo usuário, verifique se o ID já existe! " + e);
-
+                retorno = 1;
             }
+
         }
+        return retorno;
     }
 
-    public void deletar() {
-        consultar();
+    public int deletar() {
+        int retorno = 1;
+        // int resposta = consultar();
+        if (consultar() == 0) {
 
-        String sql = "delete from  tbusuarios where iduser=?";
+            int excluir = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja excluir este usuário?", "Atenção", JOptionPane.YES_NO_OPTION);
 
-        int excluir = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja excluir este usuário?", "Atenção", JOptionPane.YES_NO_OPTION);
+            if (excluir == JOptionPane.YES_NO_OPTION) {
+                try {
+                    String sql = "delete from  tbusuarios where iduser=?";
+                    //Pegar Texto digitado no campo ID 
+                    pst = conexao.prepareStatement(sql);
+                    pst.setString(1, txtUsoID.getText());
+                    //Executar a Quary
+                    int execucaoDelete = 0;
+                    execucaoDelete = pst.executeUpdate();
+                    //System.out.println(execucaoDelete);
 
-        if (excluir == JOptionPane.YES_NO_OPTION) {
-            try {
-                //Pegar Texto digitado no campo ID 
-                pst = conexao.prepareStatement(sql);
-                pst.setString(1, txtUsoID.getText());
-                //Executar a Quary
-                int execucaoDelete = 0;
-                execucaoDelete = pst.executeUpdate();
-                //System.out.println(execucaoDelete);
-
-                if (execucaoDelete == 1) {
-                    JOptionPane.showMessageDialog(null, "Usuário excluído com sucesso!");
-                    txtUsoID.setText("");
-                    txtUsoNome.setText("");
-                    txtUsoFone.setText("");
-                    txtUsologin.setText("");
-                    txtUsoPrimeiraSenha.setText("");
-                    txtUsoSenhaVerificada.setText("");
+                    if (execucaoDelete == 1) {
+                        JOptionPane.showMessageDialog(null, "Usuário excluído com sucesso!");
+                        txtUsoID.setText("");
+                        txtUsoNome.setText("");
+                        txtUsoFone.setText("");
+                        txtUsologin.setText("");
+                        txtUsoPrimeiraSenha.setText("");
+                        txtUsoSenhaVerificada.setText("");
+                        retorno = 0;
+                    }
+                } catch (Exception e) {
+                    System.out.println(e);
                 }
-
-            } catch (Exception e) {
-                System.out.println(e);
-
             }
         }
+        return retorno;
     }
 
-    public void editar() {
-        //consultar();
-        if ((txtUsoID.getText().isEmpty() || txtUsoNome.getText().isEmpty() || txtUsologin.getText()
-                .isEmpty() || txtUsoPrimeiraSenha.getText().isEmpty()) || (txtUsoSenhaVerificada.getText()
-                == null ? txtUsoPrimeiraSenha.getText() != null : !txtUsoSenhaVerificada.getText().equals(txtUsoPrimeiraSenha.getText()))) {
+    public int editar() {
+        int retorno = 1;
+            if ((txtUsoID.getText().isEmpty() || txtUsoNome.getText().isEmpty() || txtUsologin.getText()
+                    .isEmpty() || txtUsoPrimeiraSenha.getText().isEmpty()) || (txtUsoSenhaVerificada.getText()
+                    == null ? txtUsoPrimeiraSenha.getText() != null : !txtUsoSenhaVerificada.getText().equals(txtUsoPrimeiraSenha.getText()))) {
+                JOptionPane.showMessageDialog(null, "Algum campo não foi preenchido ou senhas digitadas não correspondem.");
+                retorno = 1;
 
-            JOptionPane.showMessageDialog(null, "Algum campo não foi preenchido ou senhas digitadas não correspondem.");
-        } else {
+            } else {
+                String sql = "update tbusuarios set usuario=?,fone=?,login=?,senha=?,perfil=? where iduser=?";
 
-            String sql = "update tbusuarios set usuario=?,fone=?,login=?,senha=?,perfil=? where iduser=?";
+                try {
+                    //Pegar Texto digitado nos campos do cadastro do Usuario 
+                    pst = conexao.prepareStatement(sql);
+                    pst.setString(1, txtUsoNome.getText());
+                    pst.setString(2, txtUsoFone.getText());
+                    pst.setString(3, txtUsologin.getText());
+                    pst.setString(4, txtUsoSenhaVerificada.getText());
+                    pst.setString(5, cbxUsoPerfil.getSelectedItem().toString());
+                    pst.setString(6, txtUsoID.getText());
 
-            try {
-                //Pegar Texto digitado nos campos do cadastro do Usuario 
-                pst = conexao.prepareStatement(sql);
+                    int execucaoUpdate = pst.executeUpdate();
 
-                pst.setString(1, txtUsoNome.getText());
-                pst.setString(2, txtUsoFone.getText());
-                pst.setString(3, txtUsologin.getText());
-                pst.setString(4, txtUsoSenhaVerificada.getText());
-                pst.setString(5, cbxUsoPerfil.getSelectedItem().toString());
+                    System.out.println(execucaoUpdate);
 
-                pst.setString(6, txtUsoID.getText());
+                    if (execucaoUpdate == 1) {
+                        JOptionPane.showMessageDialog(null, "Usuário atualizado.");
+                        retorno = 0;
+                    }
 
-                int execucaoUpdate = pst.executeUpdate();
-
-                System.out.println(execucaoUpdate);
-
-                if (execucaoUpdate == 1) {
-                    JOptionPane.showMessageDialog(null, "Usuário atualizado.");
+                } catch (Exception e) {
+                    System.out.println(e);
                 }
-
-            } catch (Exception e) {
-                System.out.println(e);
-            }
-        }
+                 consultar();
+            }        
+        return retorno;
+       
     }
 
     @SuppressWarnings("unchecked")
@@ -466,7 +473,6 @@ public class TelaUsuario extends javax.swing.JInternalFrame {
     private void btnUsoPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUsoPesquisarActionPerformed
         // TODO add your handling code here:
         consultar();
-        //System.out.println("Botão foi clicado!");
     }//GEN-LAST:event_btnUsoPesquisarActionPerformed
 
     private void btnUsoAdicionarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUsoAdicionarActionPerformed
@@ -480,20 +486,12 @@ public class TelaUsuario extends javax.swing.JInternalFrame {
 
     private void btnUsoDeletarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUsoDeletarActionPerformed
         // TODO add your handling code here:
-        if (txtUsoID.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Por favor preencher o campo ID do usuário a ser excluído.");
-        } else {
-            deletar();
-        }
+        deletar();
     }//GEN-LAST:event_btnUsoDeletarActionPerformed
 
     private void btnUsoEditarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUsoEditarActionPerformed
-        // TODO add your handling code here:
-        if (txtUsoID.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Por favor preencher o campo ID do usuário a ser editado.");
-        } else {
-            editar();
-        }
+        // TODO add your handling code here:        
+        editar();
     }//GEN-LAST:event_btnUsoEditarActionPerformed
 
 
